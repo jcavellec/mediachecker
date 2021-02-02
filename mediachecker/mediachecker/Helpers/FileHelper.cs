@@ -38,12 +38,13 @@ namespace mediachecker.Helpers
         private static string GetCleanName(string name)
         {
             string properName = Path.GetFileNameWithoutExtension(name);
-            return ContainsDate(name) ? properName.Split('(')[0] : properName;
+            return ContainsDate(name) ? properName.Substring(0, properName.IndexOf('(')-1) : properName;
         }
         
-        private static string GetCleanDate(string name)
+        private static short? GetCleanDate(string name)
         {
-            return ContainsDate(name) ? Path.GetFileNameWithoutExtension(name).Split('(')[1].Replace(")", "") : null;
+            string properName = Path.GetFileNameWithoutExtension(name);
+            return ContainsDate(name) ? short.Parse(properName.Substring(properName.IndexOf('(')+1, 4)) : null;
         }
 
         private static bool ContainsDate(string name)
