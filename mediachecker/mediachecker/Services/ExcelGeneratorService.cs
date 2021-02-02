@@ -14,7 +14,7 @@ namespace mediachecker.Services
             excel.Workbook.Worksheets.Add("MOVIES");
             var headerRow = new List<string[]>()
             {
-                new string[] { "ID", "NAME", "DATE", "EXTENSION", "SIZE" }
+                new string[] { "ID", "NAME", "TYPE", "SIZE", "DATE" }
             };
   
             // Determine the header range (e.g. A1:D1)

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using mediachecker.Models;
 
 namespace mediachecker.Helpers
@@ -9,27 +10,45 @@ namespace mediachecker.Helpers
     public class FileHelper
     {
         private static string _name;
-        
+
         public static List<MediaFileModel> GetContentFolder(string inputFolder)
         {
             var objs = Directory.GetFiles(inputFolder).Select(file =>
-                new MediaFileModel
-                {
-                    Name = Path.GetFileNameWithoutExtension(file),
-                    Extension = Path.GetExtension(file),
-                    Size = new FileInfo(Path.GetFullPath(file)).Length / 1024 / 1024
-                }).ToList();
+                 new MediaFileModel
+                 {
+                     Name = GetCleanName(file),
+                     Extension = Path.GetExtension(file),
+                     Size = new FileInfo(Path.GetFullPath(file)).Length / 1024 / 1024,
+                     Date = GetCleanDate(file)
+                 }).ToList();
+ 
+             objs.AddRange(
+                 from folder in Directory.GetDirectories(inputFolder)
+                 from file in Directory.GetFiles(folder)
+                 select new MediaFileModel
+                 {
+                     Name = GetCleanName(file),
+                     Extension = Path.GetExtension(file),
+                     Size = new FileInfo(Path.GetFullPath(file)).Length / 1024 / 1024,
+                     Date = GetCleanDate(file)
+                 });
+             return objs;
+        }
 
-            objs.AddRange(
-                from folder in Directory.GetDirectories(inputFolder)
-                from file in Directory.GetFiles(folder)
-                select new MediaFileModel
-                {
-                    Name = Path.GetFileNameWithoutExtension(file),
-                    Extension = Path.GetExtension(file),
-                    Size = new FileInfo(Path.GetFullPath(file)).Length / 1024 / 1024
-                });
-            return objs;
+        private static string GetCleanName(string name)
+        {
+            string properName = Path.GetFileNameWithoutExtension(name);
+            return ContainsDate(name) ? properName.Split('(')[0] : properName;
+        }
+        
+        private static string GetCleanDate(string name)
+        {
+            return ContainsDate(name) ? Path.GetFileNameWithoutExtension(name).Split('(')[1].Replace(")", "") : null;
+        }
+
+        private static bool ContainsDate(string name)
+        {
+            return name.Contains('(');
         }
 
         public static void GetMetaDataFromList(List<MediaFileModel> mediaFiles)
@@ -39,20 +58,17 @@ namespace mediachecker.Helpers
             {
                 _name = mediaFile.Name.Trim();
                 var dataArray = _name.Split('.');
-                
+
                 // TODO
                 if (IsAudio(mediaFile))
                 {
-                                
                 }
-                
-                
+
+
                 if (IsMovie(mediaFile))
                 {
-                
                 }
             }
-
         }
 
         private static bool IsAudio(MediaFileModel mediaFileModel)
@@ -68,7 +84,7 @@ namespace mediachecker.Helpers
                 _ => false
             };
         }
-        
+
         private static bool IsMovie(MediaFileModel mediaFileModel)
         {
             return mediaFileModel.Extension switch

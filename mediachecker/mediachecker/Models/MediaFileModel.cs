@@ -15,6 +15,7 @@ namespace mediachecker.Models
 
         public long Size { get; set; }
 
-        public short Date { get; set; }
+        #nullable enable
+        public string? Date { get; set; }
     }
 }
