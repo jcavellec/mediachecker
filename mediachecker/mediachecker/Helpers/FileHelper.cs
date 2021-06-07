@@ -14,27 +14,25 @@ namespace mediachecker.Helpers
         public static List<MediaFileModel> GetContentFolder(string inputFolder)
         {
             var objs = Directory.GetFiles(inputFolder).Select(file =>
-                 new MediaFileModel
-                 {
-                     Name = GetCleanName(file),
-                     Extension = Path.GetExtension(file),
-                     Size = new FileInfo(Path.GetFullPath(file)).Length / 1024 / 1024,
-                     Date = GetCleanDate(file)
-                 }).ToList();
- 
-             objs.AddRange(
-                 from folder in Directory.GetDirectories(inputFolder)
-                 from file in Directory.GetFiles(folder)
-                 select new MediaFileModel
-                 {
-                     Name = GetCleanName(file),
-                     Extension = Path.GetExtension(file),
-                     Size = new FileInfo(Path.GetFullPath(file)).Length / 1024 / 1024,
-                     Date = GetCleanDate(file)
-                 });
+                MediaFileFactory(file)).ToList();
+
+            objs.AddRange(
+                from folder in Directory.GetDirectories(inputFolder)
+                from file in Directory.GetFiles(folder)
+                select MediaFileFactory(file));
              return objs;
         }
 
+        private static MediaFileModel MediaFileFactory(string file)
+        {
+            return new()
+            {
+                Name = GetCleanName(file),
+                Extension = Path.GetExtension(file),
+                Size = new FileInfo(Path.GetFullPath(file)).Length / 1024 / 1024,
+                Date = GetCleanDate(file)
+            };
+        }
         private static string GetCleanName(string name)
         {
             string properName = Path.GetFileNameWithoutExtension(name);
